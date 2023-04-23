@@ -1,0 +1,1574 @@
+# Some items included in this schema come from and are inspired by the Messari Generic Schema
+
+enum MarketStatus {
+  ACTIVE
+  FILLED
+  FILLED_PARTIAL
+  CANCELLED
+  CANCELLED_PARTIAL
+  EXPIRED
+}
+
+enum PlotSource {
+  SOW
+  DRAFT
+  TRANSFER
+}
+
+type Hooliganhorde @entity {
+  " Smart contract address of the protocol's main contract (Factory, Registry, etc) "
+  id: ID!
+
+  " Name of the protocol, including version. e.g. Uniswap v3 "
+  name: String!
+
+  " Slug of protocol, including version. e.g. uniswap-v3 "
+  slug: String!
+
+  " Version of the subgraph schema, in SemVer format (e.g. 1.0.0) "
+  schemaVersion: String!
+
+  " Version of the subgraph implementation, in SemVer format (e.g. 1.0.0) "
+  subgraphVersion: String!
+
+  " Version of the methodology used to compute metrics, loosely based on SemVer format (e.g. 1.0.0) "
+  methodologyVersion: String!
+
+  " Timestamp of the latest DiamondCut call "
+  lastUpgrade: BigInt!
+  
+  " Season specific data "
+  seasons: [Season!]! @derivedFrom(field: "hooliganhorde")
+  
+  " Firm level data "
+  firm: Firm! @derivedFrom(field: "hooliganhorde")
+
+  " Field level data "
+  field: Field! @derivedFrom(field: "hooliganhorde")
+
+  " Last season called "
+  lastSeason: Int!
+
+  " Array of the addresses for all active guvnors in the firm "
+  activeGuvnors: [String!]!
+
+  " Array of the addresses for all guvnors that had firm transfers and need horde/prospects/roots updated "
+  guvnorsToUpdate: [String!]!
+}
+
+# An entity that holds season level data
+type Season @entity {
+  " Season Number" 
+  id: ID!
+  
+  " Hooliganhorde Contract Address "
+  hooliganhorde: Hooliganhorde!
+
+  " Season number in Int form for sorting "
+  season: Int!
+
+  " Block timestamp when sunrise was called "
+  createdAt: BigInt!
+  
+  " Price of HOOLIGAN during sunrise "
+  price: BigDecimal!
+
+  " Total Hooligan supply "
+  hooligans: BigInt!
+
+  " Hooligan Market Cap "
+  marketCap: BigDecimal!
+
+  " Time weighted deltaB "
+  deltaB: BigInt!
+
+  " Change in Hooligan supply "
+  deltaHooligans: BigInt!
+
+  " Amount of Hooligans minted during sunrise "
+  rewardHooligans: BigInt!
+
+  " Amount of Hooligans paid to sunrise caller "
+  incentiveHooligans: BigInt!
+
+  " New draftable index for the season "
+  draftableIndex: BigInt!
+}
+
+type Firm @entity {
+  "Address for the guvnor or Hooliganhorde"
+  id: ID!
+  "Hooliganhorde diamond address"
+  hooliganhorde: Hooliganhorde!
+  "Guvnor address if applicable"
+  guvnor: Guvnor
+  "Tokens whitelisted for deposit within the firm"
+  whitelistedTokens: [String!]!
+  "Link to all firm assets currently associated with this firm"
+  assets: [FirmAsset!]! @derivedFrom(field: "firm")
+  "Current BDV of all deposited assets"
+  depositedBDV: BigInt!
+  "Current horde balance"
+  horde: BigInt!
+  "Current plantable horde for hooligan seigniorage not yet claimed"
+  plantableHorde: BigInt!
+  "Current prospects balance"
+  prospects: BigInt!
+  "Current roots balance"
+  roots: BigInt!
+  "Cumulative total for hooligan mints sent to the firm"
+  hooliganMints: BigInt!
+  "Current number of active guvnors deposited in the firm"
+  activeGuvnors: Int!
+  "Link to hourly snapshot data"
+  hourlySnapshots: [FirmHourlySnapshot!]! @derivedFrom(field: "firm")
+  "Link to daily snapshot data"
+  dailySnapshots: [FirmDailySnapshot!]! @derivedFrom(field: "firm")
+}
+
+type FirmHourlySnapshot @entity {
+  "ID of firm-Unix Hour Timestamp"
+  id: ID!
+  "Season for the snapshot"
+  season: Int!
+  "Firm associated with the snapshot"
+  firm: Firm!
+  "Point in time current BDV of all deposited assets"
+  depositedBDV: BigInt!
+  "Point in time current horde balance"
+  horde: BigInt!
+  "Point in time current plantable horde for hooligan seigniorage not yet claimed"
+  plantableHorde: BigInt!
+  "Point in time current prospects balance"
+  prospects: BigInt!
+  "Point in time current roots balance"
+  roots: BigInt!
+  "Point in time cumulative total for hooligan mints sent to the firm"
+  hooliganMints: BigInt!
+  "Point in time current number of active guvnors deposited in the firm"
+  activeGuvnors: Int!
+  "Point in time delta BDV of all deposited assets"
+  deltaDepositedBDV: BigInt!
+  "Point in time delta horde balance"
+  deltaHorde: BigInt!
+  "Point in time current plantable horde for hooligan seigniorage not yet claimed"
+  deltaPlantableHorde: BigInt!
+  "Point in time delta prospects balance"
+  deltaProspects: BigInt!
+  "Point in time delta roots balance"
+  deltaRoots: BigInt!
+  "Point in time delta total for hooligan mints sent to the firm"
+  deltaHooliganMints: BigInt!
+  "Point in time delta number of active guvnors deposited in the firm"
+  deltaActiveGuvnors: Int!
+  "Timestamp of initial snapshot creation"
+  createdAt: BigInt!
+  "Timestamp of last entity update"
+  updatedAt: BigInt!
+}
+
+type FirmDailySnapshot @entity {
+  "ID of firm-Unix Hour Timestamp"
+  id: ID!
+  "Last season for the snapshot"
+  season: Int!
+  "Firm associated with the snapshot"
+  firm: Firm!
+  "Point in time current BDV of all deposited assets"
+  depositedBDV: BigInt!
+  "Point in time current horde balance"
+  horde: BigInt!
+  "Point in time current plantable horde for hooligan seigniorage not yet claimed"
+  plantableHorde: BigInt!
+  "Point in time current prospects balance"
+  prospects: BigInt!
+  "Point in time current roots balance"
+  roots: BigInt!
+  "Point in time cumulative total for hooligan mints sent to the firm"
+  hooliganMints: BigInt!
+  "Point in time current number of active guvnors deposited in the firm"
+  activeGuvnors: Int!
+  "Point in time delta BDV of all deposited assets"
+  deltaDepositedBDV: BigInt!
+  "Point in time delta horde balance"
+  deltaHorde: BigInt!
+  "Point in time current plantable horde for hooligan seigniorage not yet claimed"
+  deltaPlantableHorde: BigInt!
+  "Point in time delta prospects balance"
+  deltaProspects: BigInt!
+  "Point in time delta roots balance"
+  deltaRoots: BigInt!
+  "Point in time delta total for hooligan mints sent to the firm"
+  deltaHooliganMints: BigInt!
+  "Point in time delta number of active guvnors deposited in the firm"
+  deltaActiveGuvnors: Int!
+  "Timestamp of initial snapshot creation"
+  createdAt: BigInt!
+  "Timestamp of last entity update"
+  updatedAt: BigInt!
+}
+
+type FirmAsset @entity {
+  "Firm ID - Asset Token Address"
+  id: ID!
+  "Firm for this asset"
+  firm: Firm!
+  "Token address for this asset"
+  token: String!
+  "Current BDV of deposits"
+  depositedBDV: BigInt!
+  "Current Token amount of deposits"
+  depositedAmount: BigInt!
+  "Current Token amount of firm withdrawals"
+  withdrawnAmount: BigInt!
+  "Current internal (farm) balance of the asset"
+  farmAmount: BigInt!
+  "Link to hourly snapshot data"
+  hourlySnapshots: [FirmAssetHourlySnapshot!]! @derivedFrom(field: "firmAsset")
+  "Link to daily snapshot data"
+  dailySnapshots: [FirmAssetDailySnapshot!]! @derivedFrom(field: "firmAsset")
+}
+
+type FirmAssetHourlySnapshot @entity {
+  "Firm Asset ID - Unix Timestamp"
+  id: ID!
+  "Season for the snapshot"
+  season: Int!
+  "Firm asset associated with this snapshot"
+  firmAsset: FirmAsset!
+  "Point in time current BDV of deposits"
+  depositedBDV: BigInt!
+  "Point in time current Token amount of deposits"
+  depositedAmount: BigInt!
+  "Point in time current Token amount of firm withdrawals"
+  withdrawnAmount: BigInt!
+  "Point in time current internal (farm) balance of the asset"
+  farmAmount: BigInt!
+  "Point in time delta BDV of deposits"
+  deltaDepositedBDV: BigInt!
+  "Point in time delta Token amount of deposits"
+  deltaDepositedAmount: BigInt!
+  "Point in time delta Token amount of firm withdrawals"
+  deltaWithdrawnAmount: BigInt!
+  "Point in time delta internal (farm) balance of the asset"
+  deltaFarmAmount: BigInt!
+  "Timestamp of initial snapshot creation"
+  createdAt: BigInt!
+  "Timestamp of last entity update"
+  updatedAt: BigInt!
+}
+
+type FirmAssetDailySnapshot @entity {
+  "Firm Asset ID - Unix Timestamp"
+  id: ID!
+  "Last season for the snapshot"
+  season: Int!
+  "Firm asset associated with this snapshot"
+  firmAsset: FirmAsset!
+  "Point in time current BDV of deposits"
+  depositedBDV: BigInt!
+  "Point in time current Token amount of deposits"
+  depositedAmount: BigInt!
+  "Point in time current Token amount of firm withdrawals"
+  withdrawnAmount: BigInt!
+  "Point in time current internal (farm) balance of the asset"
+  farmAmount: BigInt!
+  "Point in time delta BDV of deposits"
+  deltaDepositedBDV: BigInt!
+  "Point in time delta Token amount of deposits"
+  deltaDepositedAmount: BigInt!
+  "Point in time delta Token amount of firm withdrawals"
+  deltaWithdrawnAmount: BigInt!
+  "Point in time delta internal (farm) balance of the asset"
+  deltaFarmAmount: BigInt!
+  "Timestamp of initial snapshot creation"
+  createdAt: BigInt!
+  "Timestamp of last entity update"
+  updatedAt: BigInt!
+}
+
+type FirmYield @entity {
+  "Season of data points"
+  id: ID!
+  "Sortable int field for season"
+  season: Int!
+  "Beta used for EMA"
+  beta: BigDecimal!
+  "u used for EMA"
+  u: Int!
+  "Hooligan EMA for season"
+  hooligansPerSeasonEMA: BigDecimal!
+  "Hooligan APY for two prospects per BDV"
+  twoProspectHooliganAPY: BigDecimal!
+  "Horde APY for two prospects per BDV"
+  twoProspectHordeAPY: BigDecimal!
+  "Hooligan APY for four prospects per BDV"
+  fourProspectHooliganAPY: BigDecimal!
+  "Horde APY for four prospects per BDV"
+  fourProspectHordeAPY: BigDecimal!
+  "Unix timestamp of update"
+  createdAt: BigInt!
+}
+
+type Field @entity {
+  " Contract address for this field or guvnor "
+  id: ID!
+  "Contract address of hooliganhorde"
+  hooliganhorde: Hooliganhorde!
+  "Guvnor address if applicable"
+  guvnor: Guvnor
+  "Current season number"
+  season: Int!
+  "Current intensity"
+  intensity: Int!
+  "Rate of return: Intensity / Hooligan Price"
+  realRateOfReturn: BigDecimal!
+  "Cumulative number of unique sowers"
+  numberOfSowers: Int!
+  "Cumulative number of sows"
+  numberOfSows: Int!
+  "Cumulative total of sown hooligans"
+  sownHooligans: BigInt!
+  "Array of current non-draftable plots"
+  plotIndexes: [BigInt!]!
+  "Current outstanding non-draftable rookies"
+  undraftableRookies: BigInt!
+  "Current draftable rookies"
+  draftableRookies: BigInt!
+  "Cumulative drafted rookies"
+  draftedRookies: BigInt!
+  "Current amount of rage available"
+  rage: BigInt!
+  "Current rookie index"
+  rookieIndex: BigInt!
+  "Current rookie rate: Total undraftable pods / hooligan supply"
+  rookieRate: BigDecimal!
+  "Link to hourly snapshot data"
+  hourlySnapshots: [FieldHourlySnapshot!]! @derivedFrom(field: "field")
+  "Link to daily snapshot data"
+  dailySnapshots: [FieldDailySnapshot!]! @derivedFrom(field: "field")
+}
+
+type FieldHourlySnapshot @entity {
+  "Field ID - Unix Timestamp"
+  id: ID!
+  "Field associated with this snapshot"
+  field: Field!
+  "Season"
+  season: Int!
+  "Point in time intensity"
+  intensity: Int!
+  "Point in time rate of return: Intensity / Hooligan Price"
+  realRateOfReturn: BigDecimal!
+  "Point in time cumulative number of unique sowers"
+  numberOfSowers: Int!
+  "Point in time cumulative number of sows"
+  numberOfSows: Int!
+  "Point in time cumulative total of sown hooligans"
+  sownHooligans: BigInt!
+  "Point in time outstanding non-draftable rookies"
+  undraftableRookies: BigInt!
+  "Point in time draftable rookies"
+  draftableRookies: BigInt!
+  "Point in time cumulative drafted rookies"
+  draftedRookies: BigInt!
+  "Point in time amount of rage remaining"
+  rage: BigInt!
+  "Point in time rookie index"
+  rookieIndex: BigInt!
+  "Point in time rookie rate: Total undraftable pods / hooligan supply"
+  rookieRate: BigDecimal!
+  "Point in time delta number of unique sowers"
+  deltaNumberOfSowers: Int!
+  "Point in time delta number of sows"
+  deltaNumberOfSows: Int!
+  "Point in time delta total of sown hooligans"
+  deltaSownHooligans: BigInt!
+  "Point in time delta non-draftable rookies"
+  deltaUndraftableRookies: BigInt!
+  "Point in time delta draftable rookies"
+  deltaDraftableRookies: BigInt!
+  "Point in time delta drafted rookies"
+  deltaDraftedRookies: BigInt!
+  "Point in time amount of rage issued"
+  issuedRage: BigInt!
+  "Number of blocks between sunrise and rage being sold out"
+  blocksToSoldOutRage: BigInt!
+  "Bool flag if rage sold out for the season"
+  rageSoldOut: Boolean!
+  "Creation Block Number"
+  blockNumber: BigInt!
+  "Timestamp of initial snapshot creation"
+  createdAt: BigInt!
+  "Timestamp of last entity update"
+  updatedAt: BigInt!
+}
+
+type FieldDailySnapshot @entity {
+  "Field ID - Unix Timestamp"
+  id: ID!
+  "Field associated with this snapshot"
+  field: Field!
+  "Last season in the snapshot"
+  season: Int!
+  "Point in time intensity"
+  intensity: Int!
+  "Point in time rate of return: Intensity / Hooligan Price"
+  realRateOfReturn: BigDecimal!
+  "Point in time cumulative number of unique sowers"
+  numberOfSowers: Int!
+  "Point in time cumulative number of sows"
+  numberOfSows: Int!
+  "Point in time cumulative total of sown hooligans"
+  sownHooligans: BigInt!
+  "Point in time outstanding non-draftable rookies"
+  undraftableRookies: BigInt!
+  "Point in time draftable rookies"
+  draftableRookies: BigInt!
+  "Point in time delta drafted rookies"
+  draftedRookies: BigInt!
+  "Point in time amount of rage remaining"
+  rage: BigInt!
+  "Point in time rookie index"
+  rookieIndex: BigInt!
+  "Point in time rookie rate: Total undraftable pods / hooligan supply"
+  rookieRate: BigDecimal!
+  "Point in time delta number of unique sowers"
+  deltaNumberOfSowers: Int!
+  "Point in time delta number of sows"
+  deltaNumberOfSows: Int!
+  "Point in time delta total of sown hooligans"
+  deltaSownHooligans: BigInt!
+  "Point in time delta non-draftable rookies"
+  deltaUndraftableRookies: BigInt!
+  "Point in time delta draftable rookies"
+  deltaDraftableRookies: BigInt!
+  "Point in time delta drafted rookies"
+  deltaDraftedRookies: BigInt!
+  "Point in time amount of rage issued"
+  issuedRage: BigInt!
+  "Timestamp of initial snapshot creation"
+  createdAt: BigInt!
+  "Timestamp of last entity update"
+  updatedAt: BigInt!
+}
+
+# ---===== Guvnor Account Entities =====---
+
+type Guvnor @entity {
+  "Address for the guvnor"
+  id: ID!
+  firm: Firm @derivedFrom(field: "guvnor")
+  deposits: [FirmDeposit!]! @derivedFrom(field: "guvnor")
+  withdraws: [FirmWithdraw!]! @derivedFrom(field: "guvnor")
+  field: Field @derivedFrom(field: "guvnor")
+  plots: [Plot!]! @derivedFrom(field: "guvnor")
+  listings: [RookieListing!]! @derivedFrom(field: "guvnor")
+  orders: [RookieOrder!]! @derivedFrom(field: "guvnor")
+  fills: [RookieFill!]! @derivedFrom(field: "to")
+  percoceters: [PercoceterBalance!]! @derivedFrom(field: "guvnor")
+}
+
+type FirmDeposit @entity {
+  "Account - Token Address - Season"
+  id: ID! 
+  "Guvnor address"
+  guvnor: Guvnor!
+  "Token Address"
+  token: String!
+  "Season of deposit"
+  season: Int!
+  "Current token amount deposited"
+  amount: BigInt!
+  "Original token amount deposited"
+  depositedAmount: BigInt!
+  "Token amount withdrawn"
+  withdrawnAmount: BigInt!
+  "Current BDV of the deposit"
+  bdv: BigInt!
+  "Original deposited BDV"
+  depositedBDV: BigInt!
+  "Withdrawn BDV"
+  withdrawnBDV: BigInt!
+  "Transaction hashes for multiple deposits in one season"
+  hashes: [String!]!
+  "Timestamp of first deposit"
+  createdAt: BigInt!
+  "Timestamp when last updated"
+  updatedAt: BigInt!
+}
+
+type FirmWithdraw @entity {
+  "Account - Deposit Token - Current Season"
+  id: ID!
+  "Guvnor address"
+  guvnor: Guvnor!
+  "Token address"
+  token: String!
+  "Season withdrawal initiated"
+  withdrawSeason: Int!
+  "Season when withdrawal can be claimed"
+  claimableSeason: Int!
+  "Flag for if this has been claimed"
+  claimed: Boolean!
+  "Token amount withdrawn"
+  amount: BigInt!
+  "Transaction hash of withdrawal"
+  hashes: [String!]!
+  "Timestamp created"
+  createdAt: BigInt!
+}
+
+type Plot @entity {
+  "Plot index"
+  id: ID! 
+  "Field to which this plot belongs"
+  field: Field!
+  "Guvnor who owns this plot"
+  guvnor: Guvnor!
+  "Transaction source for this plot"
+  source: PlotSource!
+  "Associated plot listing"
+  listing: RookieListing
+  "Season when created"
+  season: Int!
+  "Creation transaction hash"
+  creationHash: String!
+  "Timestamp of creation"
+  createdAt: BigInt!
+  "Timestamp when updated"
+  updatedAt: BigInt!
+  "Plot Index"
+  index: BigInt!
+  "Hooligans used to sow, if any"
+  hooligans: BigInt!
+  "Total rookies in plot"
+  rookies: BigInt!
+  "Total rookies that were sown, if any"
+  sownRookies: BigInt!
+  "Intensity when the plot was sown"
+  intensity: Int!
+  "Number of rookies draftable"
+  draftableRookies: BigInt!
+  "Number of rookies drafted"
+  draftedRookies: BigInt!
+  "Flag for if plot is fully drafted"
+  fullyDrafted: Boolean!
+}
+
+type RookieMarketplace @entity {
+  " Contract address of hooliganhorde "
+  id: ID!
+  "Current season of the marketplace"
+  season: Int!
+  "Indexes of actively listed plots"
+  listingIndexes: [BigInt!]!
+  "Active rookie order IDs"
+  orders: [RookieOrder!]!
+  "All historical listings"
+  allListings: [RookieListing!]! @derivedFrom(field: "rookieMarketplace")
+  "All historical orders"
+  allOrders: [RookieOrder!]! @derivedFrom(field: "rookieMarketplace")
+  "All historical marketplace fills"
+  fills: [RookieFill!]! @derivedFrom(field: "rookieMarketplace")
+  "Current cumulative rookies listed for sale"
+  listedRookies: BigInt!
+  "Current cumulative rookie listings filled"
+  filledListedRookies: BigInt!
+  "Current cumulative rookie listings that expired"
+  expiredListedRookies: BigInt!
+  "Current cumulative rookie listings that were cancelled"
+  cancelledListedRookies: BigInt!
+  "Current amount of total rookies listed"
+  availableListedRookies: BigInt!
+  "Current cumulative rookie orders created"
+  orderedRookies: BigInt!
+  "Current cumulative rookie orders filled"
+  filledOrderedRookies: BigInt!
+  "Current cumulative rookie orders cancelled"
+  cancelledOrderedRookies: BigInt!
+  "Cumulative rookie volume between listings and orders"
+  rookieVolume: BigInt!
+  "Cumulative hooligan volume between listings and orders"
+  hooliganVolume: BigInt!
+  "Link to hourly snapshot data"
+  hourlySnapshots: [RookieMarketplaceHourlySnapshot!]! @derivedFrom(field: "rookieMarketplace")
+  "Link to daily snapshot data"
+  dailySnapshots: [RookieMarketplaceDailySnapshot!]! @derivedFrom(field: "rookieMarketplace")
+}
+
+type RookieMarketplaceHourlySnapshot @entity {
+  "Marketplace ID - Unix Timestamp"
+  id: ID!
+  "Point in time latest season"
+  season: Int!
+  "Marketplace associated with snapshot"
+  rookieMarketplace: RookieMarketplace!
+  "Point in time current cumulative rookies listed for sale"
+  listedRookies: BigInt!
+  "Point in time current cumulative rookie listings filled"
+  filledListedRookies: BigInt!
+  "Point in time current cumulative rookie listings that expired"
+  expiredListedRookies: BigInt!
+  "Point in time current cumulative rookie listings that were cancelled"
+  cancelledListedRookies: BigInt!
+  "Point in time current amount of total rookies listed"
+  availableListedRookies: BigInt!
+  "Point in time current cumulative rookie orders created"
+  orderedRookies: BigInt!
+  "Point in time current cumulative rookie orders filled"
+  filledOrderedRookies: BigInt!
+  "Point in time current cumulative rookie orders cancelled"
+  cancelledOrderedRookies: BigInt!
+  "Point in time current cumulative rookie volume between listings and orders"
+  rookieVolume: BigInt!
+  "Point in time current cumulative hooligan volume between listings and orders"
+  hooliganVolume: BigInt!
+  "Point in time current delta rookies listed for sale"
+  deltaListedRookies: BigInt!
+  "Point in time current delta rookie listings filled"
+  deltaFilledListedRookies: BigInt!
+  "Point in time current delta rookie listings that expired"
+  deltaExpiredListedRookies: BigInt!
+  "Point in time current delta rookie listings that were cancelled"
+  deltaCancelledListedRookies: BigInt!
+  "Point in time current delta of total rookies listed"
+  deltaAvailableListedRookies: BigInt!
+  "Point in time current delta rookie orders created"
+  deltaOrderedRookies: BigInt!
+  "Point in time current delta rookie orders filled"
+  deltaFilledOrderedRookies: BigInt!
+  "Point in time current delta rookie orders cancelled"
+  deltaCancelledOrderedRookies: BigInt!
+  "Point in time current delta rookie volume between listings and orders"
+  deltaRookieVolume: BigInt!
+  "Point in time current delta hooligan volume between listings and orders"
+  deltaHooliganVolume: BigInt!
+  "Timestamp of initial snapshot creation"
+  createdAt: BigInt!
+  "Timestamp of last entity update"
+  updatedAt: BigInt!
+}
+
+type RookieMarketplaceDailySnapshot @entity {
+  "Marketplace ID - Unix Timestamp"
+  id: ID!
+  "Point in time latest season"
+  season: Int!
+  "Marketplace associated with snapshot"
+  rookieMarketplace: RookieMarketplace!
+  "Point in time current cumulative rookies listed for sale"
+  listedRookies: BigInt!
+  "Point in time current cumulative rookie listings filled"
+  filledListedRookies: BigInt!
+  "Point in time current cumulative rookie listings that expired"
+  expiredListedRookies: BigInt!
+  "Point in time current cumulative rookie listings that were cancelled"
+  cancelledListedRookies: BigInt!
+  "Point in time current amount of total rookies listed"
+  availableListedRookies: BigInt!
+  "Point in time current cumulative rookie orders created"
+  orderedRookies: BigInt!
+  "Point in time current cumulative rookie orders filled"
+  filledOrderedRookies: BigInt!
+  "Point in time current cumulative rookie orders cancelled"
+  cancelledOrderedRookies: BigInt!
+  "Point in time current cumulative rookie volume between listings and orders"
+  rookieVolume: BigInt!
+  "Point in time current cumulative hooligan volume between listings and orders"
+  hooliganVolume: BigInt!
+  "Point in time current delta rookies listed for sale"
+  deltaListedRookies: BigInt!
+  "Point in time current delta rookie listings filled"
+  deltaFilledListedRookies: BigInt!
+  "Point in time current delta rookie listings that expired"
+  deltaExpiredListedRookies: BigInt!
+  "Point in time current delta rookie listings that were cancelled"
+  deltaCancelledListedRookies: BigInt!
+  "Point in time current delta of total rookies listed"
+  deltaAvailableListedRookies: BigInt!
+  "Point in time current delta rookie orders created"
+  deltaOrderedRookies: BigInt!
+  "Point in time current delta rookie orders filled"
+  deltaFilledOrderedRookies: BigInt!
+  "Point in time current delta rookie orders cancelled"
+  deltaCancelledOrderedRookies: BigInt!
+  "Point in time current delta rookie volume between listings and orders"
+  deltaRookieVolume: BigInt!
+  "Point in time current delta hooligan volume between listings and orders"
+  deltaHooliganVolume: BigInt!
+  "Timestamp of initial snapshot creation"
+  createdAt: BigInt!
+  "Timestamp of last entity update"
+  updatedAt: BigInt!
+}
+
+type RookieListing @entity {
+  ######################## Identifiers ########################
+
+  """
+  The RookieListing ID is a unique subgraph ID: `{account}-{index}"
+
+  The on-chain identifier for a RookieListing is the `index`.
+  """
+  id: ID!
+
+  "Marketplace used for listing"
+  rookieMarketplace: RookieMarketplace!
+
+  "Historical ID for joins"
+  historyID: String!
+
+  "Plot being Listed."
+  plot: Plot!
+
+  "The Guvnor that created the RookieListing."
+  guvnor: Guvnor!
+
+  ######################## Configuration ########################
+
+  """
+  The absolute index of the listed Plot in the Rookie Line.
+ 
+  Measured from the front, so the Listing contains all Rookies between
+  (index) and (index + totalAmount).
+ 
+  An example where the rookieLine is 50,000 but the index is 150,000:
+     0         the first Rookie issued
+     100,000   draftableIndex
+     150,000   index
+  """
+  index: BigInt!
+
+  """
+  The position within the Plot from which to sell Rookies.
+
+  0 <= `start` <= (plot size - `amount`)
+  """
+  start: BigInt!
+
+  "Where Hooligans are sent when the RookieListing is Filled. See `FarmToMode`."
+  mode: Int!
+
+  ######################## Constraints ########################
+
+  """
+  When the `draftableIndex` reaches this number, the Listing becomes EXPIRED.
+  """
+  maxDraftableIndex: BigInt!
+
+  "Minimum number of Hooligans required to perform a Fill."
+  minFillAmount: BigInt!
+
+  ######################## Pricing ########################
+
+  """
+  The Pricing Type states whether this RookieListing uses FIXED or DYNAMIC pricing.
+
+  null = V1 FIXED  = use `pricePerRookie`
+  0    = V2 FIXED  = use `pricePerRookie`
+  1    = V2 DYNAMIC = use `pricingFunction`
+  """
+  pricingType: Int
+  
+  """
+  [V1] The FIXED price per Rookie denominated in Hooligans.
+
+  Ex. `pricePerRookie = 10000` indicates a price of 0.01 Hooligans per Pod.
+
+  If `pricingType = 1`, this field is set to `0` and should be ignored.
+  """
+  pricePerRookie: Int!
+
+  """
+  [V2] The FIXED or DYNAMIC pricing function, encoded as bytes.
+
+  This must be decoded client-side, see `LibPolynomial.sol` for more info.
+  """
+  pricingFunction: Bytes
+
+  ######################## Amounts [Relative to Original] ########################
+
+  """
+  The original index from the first emission of RookieListingCreated in a chain.
+  
+  If `originalIndex !== index`, then this RookieListing was created when a parent
+  RookieListing was partially filled.
+  """
+  originalIndex: BigInt!
+
+  """
+  The total number of Rookies listed during the first emission of PodListingCreated.
+  """
+  originalAmount: BigInt!
+
+  """
+  The amount of Rookies Filled since the initial PodListing was Created.
+  
+  `0 <= filled <= originalAmount`
+  """
+  filled: BigInt!
+
+  ######################## Amounts [Relative to Child] ########################
+  
+  """
+  The maximum amount of Rookies remaining to be sold by *this* PodListing.
+
+  When this RookieListing is Filled or Cancelled, `amount` does NOT change.
+  """
+  amount: BigInt!
+
+  """
+  The number of Rookies remaining in *this* PodListing.
+
+  When a Fill occurs, `remainingAmount` is decremented on this RookieListing. A new
+  RookieListing is created with an updated `index` and `amount` equal to this
+  RookieListing's remainingAmount.
+
+  If this RookieListing has NOT been Filled: `remainingAmount = amount`
+  If this RookieListing has been Filled: `remainingAmount < amount`
+  If this RookieListing has been Cancelled: `remainingAmount = 0`
+  """
+  remainingAmount: BigInt!
+
+  """
+  The number of Rookies purchased from *this* PodListing.
+
+  If not yet Filled or the RookieListing is CANCELLED: `filledAmount = 0`
+  """
+  filledAmount: BigInt!
+
+  """
+  The number of Rookies that were remaining in *this* PodListing when it was Cancelled.
+  """
+  cancelledAmount: BigInt!
+
+  ######################## Activity ########################
+
+  "Any Fills associated with this RookieListing."
+  fill: RookieFill
+
+  ######################## Metadata ########################
+
+  "Current market status of listing"
+  status: MarketStatus!
+  
+  "Timestamp of RookieListing creation."
+  createdAt: BigInt!
+
+  "Timestamp of last update to this RookieListing, including Fills and Cancellations."
+  updatedAt: BigInt!
+
+  "Transaction hash when this RookieListing entity was created."
+  creationHash: String!
+}
+
+type RookieOrder @entity {
+  ######################## Identifiers ########################
+
+  """
+  The RookieOrder ID matchces the `id` stored on-chain:
+
+  `keccak256(abi.encodePacked(account, pricePerRookie, maxPlaceInLine, minFillAmount))`
+  """
+  id: ID!
+
+  """
+  Historical ID for joins: `{account}-{createdAt}`
+  """
+  historyID: String!
+
+  "The Guvnor that created the Rookie Order."
+  guvnor: Guvnor!
+
+  "Marketplace used for Rookie Order."
+  rookieMarketplace: RookieMarketplace!
+
+  ######################## Constraints ########################
+
+  """
+  The Guvnor is willing to buy any Rookie that is before maxPlaceInLine at pricePerPod.
+  As the Rookie Line moves, this value stays the same because new Pods meet the criteria.
+  """
+  maxPlaceInLine: BigInt!
+
+  "Minimum number of Rookies required to perform a Fill."
+  minFillAmount: BigInt!
+
+  ######################## Pricing ########################
+
+  """
+  The Pricing Type states whether this RookieOrder uses FIXED or DYNAMIC pricing.
+
+  null = V1 FIXED  = use `pricePerRookie`
+  0    = V2 FIXED  = use `pricePerRookie`
+  1    = V2 DYNAMIC = use `pricingFunction`
+  """
+  pricingType: Int
+
+  """
+  [V1] The FIXED price per Rookie denominated in Hooligans.
+
+  Ex. `pricePerRookie = 10000` indicates a price of 0.01 Hooligans per Pod.
+
+  If `pricingType = 1`, this field is initialized to `0` and should be ignored.
+  """
+  pricePerRookie: Int!
+
+  """
+  [V2] The FIXED or DYNAMIC pricing function, encoded as bytes.
+
+  This must be decoded client-side, see `LibPolynomial.sol` for more info.
+
+  null    = V1 FIXED    = use `pricePerRookie`
+  "0x"    = V2 FIXED    = use `pricePerRookie`
+  "0x..." = V2 DYNAMIC  = use `pricingFunction`
+  """
+  pricingFunction: Bytes
+
+  ######################## Amounts ########################
+
+  """
+  The original number of Rookies requested by this PodOrder.
+
+  Does NOT change as Fills occur.
+  Not deterministic for RookieOrders with pricingType = DYNAMIC.
+
+  If pricingType = FIXED:
+    Set to the number of Rookies which can be purchased by the Order.
+    If FIXED (V1): `amount` field emitted in RookieOrderCreated. 
+    If FIXED (V2): `amount / pricePerRookie` fields emitted in PodOrderCreated.
+
+  If pricingType = DYNAMIC:
+    Set to `0`. The number of Rookies that will be provided is unknown, since
+    the price is calculated based on the place in line of supplied Rookies.
+  """
+  rookieAmount: BigInt!
+
+  """
+  The current number of Rookies that have been purchased by this PodOrder.
+
+  Increases during each subsequent Fill.
+  If pricingType = FIXED: `0 <= rookieAmountFilled <= podAmount`
+  If pricingType = DYNAMIC: No constraint, since `rookieAmount` is unknown.
+
+  Upon RookieOrder cancellation, this value is locked.
+  """
+  rookieAmountFilled: BigInt!
+
+  """
+  The original number of Hooligans locked in the RookieOrder.
+
+  Does NOT change as Fills occur.
+  Always deterministic, since the Guvnor must lock Hooligans for RookieOrder fulfillment.
+
+  If FIXED (V1): `amount * pricePerRookie` fields emitted in PodOrderCreated.
+  If FIXED (V2): `amount` field emitted in RookieOrderCreated.
+  If DYNAMIC (V2): `amount` field emitted in RookieOrderCreated.
+  """
+  hooliganAmount: BigInt!
+
+  """
+  The current number of Hooligans spent to acquire Rookies.
+  
+  Increases during each subsequent Fill:
+  `0 <= hooliganAmountFilled <= hooliganAmount`
+
+  Upon RookieOrder cancellation, this value is locked.
+  """
+  hooliganAmountFilled: BigInt!
+
+  ######################## Activity ########################
+
+  "All Fills associated with this RookieOrder."
+  fills: [RookieFill!]!
+
+  ######################## Metadata ########################
+
+  "Current status of order."
+  status: MarketStatus!
+
+  "Timestamp of RookieOrder creation."
+  createdAt: BigInt!
+
+  "Timestamp of last RookieOrder update. Changes when a PodOrder is Filled or Cancelled."
+  updatedAt: BigInt!
+
+  "Transaction hash when this RookieOrder entity was created."
+  creationHash: String!
+}
+
+type RookieFill @entity {
+  "Hooliganhorde address - Order/Listing index - transaction hash"
+  id: ID!
+  "Marketplace associated with this fill"
+  rookieMarketplace: RookieMarketplace!
+  "Creation timestamp"
+  createdAt: BigInt!
+  "Associated listing, if any"
+  listing: RookieListing
+  "Associated order, if any"
+  order: RookieOrder
+  "Account fulfilling the order"
+  from: String!      # These are already referenced via the listing and order entities.
+  "Account filling the order"
+  to: Guvnor!
+  "Number of rookies filled"
+  amount: BigInt!
+  "Index of plot transferred"
+  index: BigInt!
+  "Start of plot transferred"
+  start: BigInt!
+  "Total hooligans used to fill listing/order"
+  costInHooligans: BigInt 
+}
+
+##################################
+##### Percoceter Entities #####
+##################################
+
+# Global Percoceter state for tracking
+type Percoceter @entity {
+  "Token address for fert"
+  id: ID!
+  "Total overall suppy of fert tokens"
+  supply: BigInt!
+  tokens: [PercoceterToken!]! @derivedFrom(field: "percoceter")
+}
+
+# Id-level Percoceter entity
+type PercoceterToken @entity {
+  "Total BPF for purchase"
+  id: ID!
+  percoceter: Percoceter!
+  "Total supply for this Culture"
+  supply: BigInt!
+  "Culture paid for this ID"
+  culture: BigDecimal!
+  "Ending BPF on creation"
+  endBpf: BigInt!
+  "Starting BPF on creation"
+  startBpf: BigInt!
+  "Season created"
+  season: Int!
+  balances: [PercoceterBalance!]! @derivedFrom(field: "percoceterToken")
+}
+
+type PercoceterBalance @entity {
+  "Percoceter Token - Guvnor address"
+  id: ID!
+  percoceterToken: PercoceterToken!
+  guvnor: Guvnor!
+  "Current balance of token"
+  amount: BigInt!
+}
+
+type PercoceterYield @entity {
+  "Season of data points"
+  id: ID!
+  "Current season"
+  season: Int!
+  "Current culture"
+  culture: BigDecimal!
+  "Current outstanding fert"
+  outstandingFert: BigInt!
+  "Current Hooligan EMA"
+  hooligansPerSeasonEMA: BigDecimal!
+  "BPF delta"
+  deltaBpf: BigDecimal!
+  "Simplified APY for new Fert"
+  simpleAPY: BigDecimal!
+  "Block timestamp at creation"
+  createdAt: BigInt!
+}
+
+##################################
+##### Event-Level Data #####
+##################################
+
+### We need to add these in
+
+"""
+An event is any user action that occurs in a protocol. Generally, they are Ethereum events
+emitted by a function in the smart contracts, stored in transaction receipts as event logs.
+However, some user actions of interest are function calls that don't emit events. For example,
+the deposit and withdraw functions in Yearn do not emit any events. In our subgraphs, we still
+store them as events, although they are not technically Ethereum events emitted by smart
+contracts.
+"""
+
+interface FirmEvent {
+  " { Event type }-{ Transaction hash }-{ Log index } "
+  id: ID!
+  " Transaction hash of the transaction that emitted this event "
+  hash: String!
+  " Event log index. For transactions that don't emit event, create arbitrary index starting from 0 "
+  logIndex: Int!
+  " The protocol this transaction belongs to "
+  protocol: Hooliganhorde!
+  " Block number of this event "
+  blockNumber: BigInt!
+  " Timestamp of this event "
+  createdAt: BigInt!
+}
+
+interface FieldEvent {
+  " { Event type }-{ Transaction hash }-{ Log index } "
+  id: ID!
+  " Transaction hash of the transaction that emitted this event "
+  hash: String!
+  " Event log index. For transactions that don't emit event, create arbitrary index starting from 0 "
+  logIndex: Int!
+  " The protocol this transaction belongs to "
+  protocol: Hooliganhorde!
+  " Block number of this event "
+  blockNumber: BigInt!
+  " Timestamp of this event "
+  createdAt: BigInt!
+}
+
+interface MarketplaceEvent {
+  " { Event type }-{ Transaction hash }-{ Log index } "
+  id: ID!
+  " Transaction hash of the transaction that emitted this event "
+  hash: String!
+  " Event log index. For transactions that don't emit event, create arbitrary index starting from 0 "
+  logIndex: Int!
+  " The protocol this transaction belongs to "
+  protocol: Hooliganhorde!
+  " Block number of this event "
+  blockNumber: BigInt!
+  " Timestamp of this event "
+  createdAt: BigInt!
+}
+
+type RookieTransfer implements FieldEvent @entity(immutable: true) {
+  " rookietransfer-{ Transaction hash }-{ Log index } "
+  id: ID!
+  " Transaction hash of the transaction that emitted this event "
+  hash: String!
+  " Event log index. For transactions that don't emit event, create arbitrary index starting from 0 "
+  logIndex: Int!
+  " The protocol this transaction belongs to "
+  protocol: Hooliganhorde!
+  " Address that received the rookies "
+  to: String!
+  " Address that sent the rookies "
+  from: String!
+  " Index of the rookies sent"
+  index: BigInt!
+  " Total rookies being sent"
+  rookies: BigInt!
+  " Block number of this event "
+  blockNumber: BigInt!
+  " Timestamp of this event "
+  createdAt: BigInt!
+}
+
+type Draft implements FieldEvent @entity(immutable: true) {
+  "draft-{ Transaction hash }-{ Log index } "
+  id: ID!
+  " Transaction hash of the transaction that emitted this event "
+  hash: String!
+  " Event log index. For transactions that don't emit event, create arbitrary index starting from 0 "
+  logIndex: Int!
+  " The protocol this transaction belongs to "
+  protocol: Hooliganhorde!
+  " Address drafting hooligans "
+  guvnor: String!
+  " Plots being drafted "
+  plots: [BigInt!]!
+  " Total hooligans drafted "
+  hooligans: BigInt!
+  " Block number of this event "
+  blockNumber: BigInt!
+  " Timestamp of this event "
+  createdAt: BigInt!
+  
+}
+
+type Chop implements FirmEvent @entity(immutable: true){
+  "chop-{ Transaction hash }-{ Log index }"
+  id: ID!
+  " Transaction hash of the transaction that emitted this event "
+  hash: String!
+  " Event log index. For transactions that don't emit event, create arbitrary index starting from 0 "
+  logIndex: Int!
+  " The protocol this transaction belongs to "
+  protocol: Hooliganhorde!
+  " Address chopping "
+  guvnor: String!
+  " Unripe token being chopped "
+  unripe: String!
+  " Amount being chopped"
+  amount: BigInt!
+  " Underlying token "
+  underlying: String!
+  " Block number of this event "
+  blockNumber: BigInt!
+  " Timestamp of this event "
+  createdAt: BigInt!
+}
+
+type Incentive implements FirmEvent @entity(immutable: true) {
+  "incentive-{ Transaction hash }-{ Log index }"
+  id: ID!
+  " Transaction hash of the transaction that emitted this event "
+  hash: String!
+  " Event log index. For transactions that don't emit event, create arbitrary index starting from 0 "
+  logIndex: Int!
+  " The protocol this transaction belongs to "
+  protocol: Hooliganhorde!
+  " Address incentivized "
+  caller: String!
+  " Amount minted as incentive"
+  amount: BigInt!
+  " Block number of this event "
+  blockNumber: BigInt!
+  " Timestamp of this event "
+  createdAt: BigInt!
+}
+
+type Reward implements FirmEvent @entity(immutable: true) {
+  "reward-{ Transaction hash }-{ Log index }"
+  id: ID!
+  " Transaction hash of the transaction that emitted this event "
+  hash: String!
+  " Event log index. For transactions that don't emit event, create arbitrary index starting from 0 "
+  logIndex: Int!
+  " The protocol this transaction belongs to "
+  protocol: Hooliganhorde!
+  " Season of reward "
+  season: Int!
+  " Amount minted to rookie line"
+  toField: BigInt!
+  " Amount minted to firm"
+  toFirm: BigInt!
+  " Amount minted to percoceter"
+  toPercoceter: BigInt!
+  " Block number of this event "
+  blockNumber: BigInt!
+  " Timestamp of this event "
+  createdAt: BigInt!
+}
+
+type MetapoolOracle implements FirmEvent @entity(immutable: true) {
+  "metapoolOracle-{ Transaction hash }-{ Log index }"
+  id: ID!
+  " Transaction hash of the transaction that emitted this event "
+  hash: String!
+  " Event log index. For transactions that don't emit event, create arbitrary index starting from 0 "
+  logIndex: Int!
+  " The protocol this transaction belongs to "
+  protocol: Hooliganhorde!
+  " Season of oracle "
+  season: Int!
+  " DeltaB for season"
+  deltaB: BigInt!
+  " Cumulative balance A"
+  balanceA: BigInt!
+  " Cumulative balance B"
+  balanceB: BigInt!
+  " Block number of this event "
+  blockNumber: BigInt!
+  " Timestamp of this event "
+  createdAt: BigInt!
+}
+
+type AddDeposit implements FirmEvent @entity(immutable: true) {
+  "addDeposit-{ Transaction hash }-{ Log index }"
+  id: ID!
+  " Transaction hash of the transaction that emitted this event "
+  hash: String!
+  " Event log index. For transactions that don't emit event, create arbitrary index starting from 0 "
+  logIndex: Int!
+  " The protocol this transaction belongs to "
+  protocol: Hooliganhorde!
+  " Account removing deposit"
+  account: String!
+  " Token removed"
+  token: String!
+  " Season of deposit removed "
+  season: Int!
+  " Amount of token removed "
+  amount: BigInt!
+  " BDV of the deposit "
+  bdv: BigInt!
+  " Block number of this event "
+  blockNumber: BigInt!
+  " Timestamp of this event "
+  createdAt: BigInt!
+}
+
+type RemoveDeposit implements FirmEvent @entity(immutable: true) {
+  "removeDeposit-{ Transaction hash }-{ Log index }"
+  id: ID!
+  " Transaction hash of the transaction that emitted this event "
+  hash: String!
+  " Event log index. For transactions that don't emit event, create arbitrary index starting from 0 "
+  logIndex: Int!
+  " The protocol this transaction belongs to "
+  protocol: Hooliganhorde!
+  " Account removing deposit"
+  account: String!
+  " Token removed"
+  token: String!
+  " Season of deposit removed "
+  season: Int!
+  " Amount of token removed "
+  amount: BigInt!
+  " Block number of this event "
+  blockNumber: BigInt!
+  " Timestamp of this event "
+  createdAt: BigInt!
+}
+
+type HordeChange implements FirmEvent @entity(immutable: true) {
+  "hordeChange-{ Transaction hash }-{ Log index }"
+  id: ID!
+  " Transaction hash of the transaction that emitted this event "
+  hash: String!
+  " Event log index. For transactions that don't emit event, create arbitrary index starting from 0 "
+  logIndex: Int!
+  " The protocol this transaction belongs to "
+  protocol: Hooliganhorde!
+  " Account removing deposit"
+  account: String!
+  " Token removed"
+  delta: BigInt!
+  " Season when the change happened "
+  season: Int!
+  " Block number of this event "
+  blockNumber: BigInt!
+  " Timestamp of this event "
+  createdAt: BigInt!
+}
+
+type ProspectChange implements FirmEvent @entity(immutable: true) {
+  "prospectChange-{ Transaction hash }-{ Log index }"
+  id: ID!
+  " Transaction hash of the transaction that emitted this event "
+  hash: String!
+  " Event log index. For transactions that don't emit event, create arbitrary index starting from 0 "
+  logIndex: Int!
+  " The protocol this transaction belongs to "
+  protocol: Hooliganhorde!
+  " Account removing deposit"
+  account: String!
+  " Token removed"
+  delta: BigInt!
+  " Season when the change happened "
+  season: Int!
+  " Block number of this event "
+  blockNumber: BigInt!
+  " Timestamp of this event "
+  createdAt: BigInt!
+}
+
+type RookieListingCreated implements MarketplaceEvent @entity(immutable: true) {
+  "rookieListingCreated-{ Transaction hash }-{ Log index }"
+  id: ID!
+  " Transaction hash of the transaction that emitted this event "
+  hash: String!
+  " Event log index. For transactions that don't emit event, create arbitrary index starting from 0 "
+  logIndex: Int!
+  " The protocol this transaction belongs to "
+  protocol: Hooliganhorde!
+  " Historical ID for joins"
+  historyID: String!
+  " Account creating the listing"
+  account: String!
+  " Index of the plot listed"
+  index: BigInt!
+  " Start value of the plot listed "
+  start: BigInt!
+  "Amount of rookies listed"
+  amount: BigInt!
+  "Price per rookie"
+  pricePerRookie: Int!
+  "Max index for listing"
+  maxDraftableIndex: BigInt!
+  "Minimum fill amount"
+  minFillAmount: BigInt!
+  "Claim to location"
+  mode: Int!
+  "Pricing Function Data"
+  pricingFunction: Bytes
+  "Pricing Type"
+  pricingType: Int
+  " Block number of this event "
+  blockNumber: BigInt!
+  " Timestamp of this event "
+  createdAt: BigInt!
+}
+
+type RookieListingFilled implements MarketplaceEvent @entity(immutable: true) {
+  "rookieListingFilled-{ Transaction hash }-{ Log index }"
+  id: ID!
+  " Transaction hash of the transaction that emitted this event "
+  hash: String!
+  " Event log index. For transactions that don't emit event, create arbitrary index starting from 0 "
+  logIndex: Int!
+  " The protocol this transaction belongs to "
+  protocol: Hooliganhorde!
+  " Historical ID for joins"
+  historyID: String!
+  "Account selling rookies"
+  from: String!
+  "Account buying rookies"
+  to: String!
+  "Index of the plot transferred"
+  index: BigInt!
+  "Start of the plot transferred"
+  start: BigInt!
+  "Number of rookies transferred"
+  amount: BigInt!
+  "Hooligans paid to fill the listing"
+  costInHooligans: BigInt
+  " Block number of this event "
+  blockNumber: BigInt!
+  " Timestamp of this event "
+  createdAt: BigInt!
+}
+
+type RookieListingCancelled implements MarketplaceEvent @entity(immutable: true) {
+  "prospectChange-{ Transaction hash }-{ Log index }"
+  id: ID!
+  " Transaction hash of the transaction that emitted this event "
+  hash: String!
+  " Event log index. For transactions that don't emit event, create arbitrary index starting from 0 "
+  logIndex: Int!
+  " The protocol this transaction belongs to "
+  protocol: Hooliganhorde!
+  " Historical ID for joins"
+  historyID: String!
+  " Account cancelling listing"
+  account: String!
+  " Index of plot listing being cancelled"
+  index: BigInt!
+  " Block number of this event "
+  blockNumber: BigInt!
+  " Timestamp of this event "
+  createdAt: BigInt!
+}
+
+type RookieOrderCreated implements MarketplaceEvent @entity(immutable: true) {
+  "rookieOrderCreated-{ Transaction hash }-{ Log index }"
+  id: ID!
+  " Transaction hash of the transaction that emitted this event "
+  hash: String!
+  " Event log index. For transactions that don't emit event, create arbitrary index starting from 0 "
+  logIndex: Int!
+  " The protocol this transaction belongs to "
+  protocol: Hooliganhorde!
+  " Historical ID for joins"
+  historyID: String!
+  " Account creating the listing"
+  account: String!
+  " ID of the rookie order"
+  orderId: String!
+  "Amount of rookies listed"
+  amount: BigInt!
+  "Price per rookie"
+  pricePerRookie: Int!
+  "Max place in line"
+  maxPlaceInLine: BigInt!
+  "Pricing Function Data"
+  pricingFunction: Bytes
+  "Pricing Type"
+  pricingType: Int
+  " Block number of this event "
+  blockNumber: BigInt!
+  " Timestamp of this event "
+  createdAt: BigInt!
+}
+
+type RookieOrderFilled implements MarketplaceEvent @entity(immutable: true) {
+  "rookieOrderFilled-{ Transaction hash }-{ Log index }"
+  id: ID!
+  " Transaction hash of the transaction that emitted this event "
+  hash: String!
+  " Event log index. For transactions that don't emit event, create arbitrary index starting from 0 "
+  logIndex: Int!
+  " The protocol this transaction belongs to "
+  protocol: Hooliganhorde!
+  " Historical ID for joins"
+  historyID: String!
+  "Account selling rookies"
+  from: String!
+  "Account buying rookies"
+  to: String!
+  "Index of the plot transferred"
+  index: BigInt!
+  "Start of the plot transferred"
+  start: BigInt!
+  "Number of rookies transferred"
+  amount: BigInt!
+  "Hooligans paid to fill the order"
+  costInHooligans: BigInt
+  " Block number of this event "
+  blockNumber: BigInt!
+  " Timestamp of this event "
+  createdAt: BigInt!
+}
+
+type RookieOrderCancelled implements MarketplaceEvent @entity(immutable: true) {
+  "rookieOrderCancelled-{ Transaction hash }-{ Log index }"
+  id: ID!
+  " Transaction hash of the transaction that emitted this event "
+  hash: String!
+  " Event log index. For transactions that don't emit event, create arbitrary index starting from 0 "
+  logIndex: Int!
+  " The protocol this transaction belongs to "
+  protocol: Hooliganhorde!
+  " Historical ID for joins"
+  historyID: String!
+  " Account cancelling listing"
+  account: String!
+  " ID of order cancelled"
+  orderId: String!
+  " Block number of this event "
+  blockNumber: BigInt!
+  " Timestamp of this event "
+  createdAt: BigInt!
+}
+
+type WhitelistToken implements FirmEvent @entity(immutable: true) {
+  "whitelistToken-{ Transaction hash }-{ Log index }"
+  id: ID!
+  " Transaction hash of the transaction that emitted this event "
+  hash: String!
+  " Event log index. For transactions that don't emit event, create arbitrary index starting from 0 "
+  logIndex: Int!
+  " The protocol this transaction belongs to "
+  protocol: Hooliganhorde!
+  "Token address whitelisted"
+  token: String!
+  "Horde per BDV"
+  horde: BigInt!
+  "Prospects per BDV"
+  prospects: BigInt!
+  "Selector for token"
+  selector: String!
+  " Block number of this event "
+  blockNumber: BigInt!
+  " Timestamp of this event "
+  createdAt: BigInt!
+}
+
+type DewhitelistToken implements FirmEvent @entity(immutable: true) {
+  "dewhitelistToken-{ Transaction hash }-{ Log index }"
+  id: ID!
+  " Transaction hash of the transaction that emitted this event "
+  hash: String!
+  " Event log index. For transactions that don't emit event, create arbitrary index starting from 0 "
+  logIndex: Int!
+  " The protocol this transaction belongs to "
+  protocol: Hooliganhorde!
+  "Token address dewhitelisted"
+  token: String!
+  " Block number of this event "
+  blockNumber: BigInt!
+  " Timestamp of this event "
+  createdAt: BigInt!
+}

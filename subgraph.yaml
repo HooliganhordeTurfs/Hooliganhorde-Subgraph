@@ -1,0 +1,393 @@
+specVersion: 0.0.4
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: Firm-Replanted
+    network: mainnet
+    source:
+      address: "0xC1E088fC1323b20BCBee9bd1B9fC9546db5624C5"
+      abi: Hooliganhorde
+      startBlock: 15277986
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - Firm-Replanted
+      abis:
+        - name: Hooliganhorde
+          file: ./abis/Hooliganhorde-BIP29.json
+        - name: UniswapV2Pair
+          file: ./abis/UniswapV2Pair.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+      eventHandlers:
+        - event: AddDeposit(indexed address,indexed address,uint32,uint256,uint256)
+          handler: handleAddDeposit
+        - event: RemoveDeposit(indexed address,indexed address,uint32,uint256)
+          handler: handleRemoveDeposit
+        - event: RemoveDeposits(indexed address,indexed address,uint32[],uint256[],uint256)
+          handler: handleRemoveDeposits
+        - event: AddWithdrawal(indexed address,indexed address,uint32,uint256)
+          handler: handleAddWithdrawal
+        - event: RemoveWithdrawal(indexed address,indexed address,uint32,uint256)
+          handler: handleRemoveWithdrawal
+        - event: RemoveWithdrawals(indexed address,indexed address,uint32[],uint256)
+          handler: handleRemoveWithdrawals
+        - event: ProspectsBalanceChanged(indexed address,int256)
+          handler: handleProspectsBalanceChanged
+        - event: HordeBalanceChanged(indexed address,int256,int256)
+          handler: handleHordeBalanceChanged
+        - event: Plant(indexed address,uint256)
+          handler: handlePlant
+        - event: WhitelistToken(indexed address,bytes4,uint256,uint256)
+          handler: handleWhitelistToken
+        - event: DewhitelistToken(indexed address)
+          handler: handleDewhitelistToken
+      file: ./src/FirmHandler.ts
+  # Field - Original
+  - kind: ethereum/contract
+    name: Field
+    network: mainnet
+    source:
+      address: "0xC1E088fC1323b20BCBee9bd1B9fC9546db5624C5"
+      abi: Hooliganhorde
+      startBlock: 12974075
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - Field
+      abis:
+        - name: Hooliganhorde
+          file: ./abis/Hooliganhorde.json
+        - name: UniswapV2Pair
+          file: ./abis/UniswapV2Pair.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: CurvePrice
+          file: ./abis/CurvePrice.json
+      eventHandlers:
+        - event: WeatherChange(indexed uint256,uint256,int8)
+          handler: handleWeatherChange
+        - event: Sow(indexed address,uint256,uint256,uint256)
+          handler: handleSow
+        - event: Draft(indexed address,uint256[],uint256)
+          handler: handleDraft
+        - event: PlotTransfer(indexed address,indexed address,indexed uint256,uint256)
+          handler: handlePlotTransfer
+        - event: SupplyIncrease(indexed uint256,uint256,uint256,uint256,int256)
+          handler: handleSupplyIncrease
+        - event: SupplyDecrease(indexed uint256,uint256,int256)
+          handler: handleSupplyDecrease
+        - event: SupplyNeutral(indexed uint256,int256)
+          handler: handleSupplyNeutral
+        - event: FundFundraiser(indexed address,indexed uint32,uint256)
+          handler: handleFundFundraiser
+      file: ./src/FieldHandler.ts
+  - kind: ethereum/contract
+    name: Season
+    network: mainnet
+    source:
+      address: "0xC1E088fC1323b20BCBee9bd1B9fC9546db5624C5"
+      abi: Hooliganhorde
+      startBlock: 12974075
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - Season
+      abis:
+        - name: Hooliganhorde
+          file: ./abis/Hooliganhorde.json
+        - name: UniswapV2Pair
+          file: ./abis/UniswapV2Pair.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+      eventHandlers:
+        - event: Sunrise(indexed uint256)
+          handler: handleSunrise
+        - event: SeasonSnapshot(indexed uint32,uint256,uint256,uint256,uint256,uint256,uint256)
+          handler: handleSeasonSnapshot
+        - event: Incentivization(indexed address,uint256)
+          handler: handleIncentive
+      file: ./src/SeasonHandler.ts
+  - kind: ethereum/contract
+    name: Marketplace
+    network: mainnet
+    source:
+      address: "0xC1E088fC1323b20BCBee9bd1B9fC9546db5624C5"
+      abi: Hooliganhorde
+      startBlock: 12974075
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - Season
+      abis:
+        - name: Hooliganhorde
+          file: ./abis/Hooliganhorde.json
+        - name: UniswapV2Pair
+          file: ./abis/UniswapV2Pair.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+      eventHandlers:
+        - event: RookieListingCreated(indexed address,uint256,uint256,uint256,uint24,uint256,bool)
+          handler: handleRookieListingCreated
+        - event: RookieListingCancelled(indexed address,uint256)
+          handler: handleRookieListingCancelled
+        - event: RookieListingFilled(indexed address,indexed address,uint256,uint256,uint256)
+          handler: handleRookieListingFilled
+        - event: RookieOrderCreated(indexed address,bytes32,uint256,uint24,uint256)
+          handler: handleRookieOrderCreated
+        - event: RookieOrderFilled(indexed address,indexed address,bytes32,uint256,uint256,uint256)
+          handler: handleRookieOrderFilled
+        - event: RookieOrderCancelled(indexed address,bytes32)
+          handler: handleRookieOrderCancelled
+      file: ./src/MarketplaceHandler.ts
+  - kind: ethereum/contract
+    name: Marketplace-Replanted
+    network: mainnet
+    source:
+      address: "0xC1E088fC1323b20BCBee9bd1B9fC9546db5624C5"
+      abi: Hooliganhorde
+      startBlock: 15277986
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - Marketplace-Replanted
+      abis:
+        - name: Hooliganhorde
+          file: ./abis/Hooliganhorde-Replanted.json
+        - name: UniswapV2Pair
+          file: ./abis/UniswapV2Pair.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+      eventHandlers:
+        - event: RookieListingCreated(indexed address,uint256,uint256,uint256,uint24,uint256,uint8)
+          handler: handleRookieListingCreated_v1_1
+      file: ./src/MarketplaceHandler.ts
+  - kind: ethereum/contract
+    name: Diamond
+    network: mainnet
+    source:
+      address: "0xC1E088fC1323b20BCBee9bd1B9fC9546db5624C5"
+      abi: Hooliganhorde
+      startBlock: 12974075
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - Diamond
+      abis:
+        - name: Hooliganhorde
+          file: ./abis/Hooliganhorde.json
+      eventHandlers:
+        - event: DiamondCut((address,uint8,bytes4[])[],address,bytes)
+          handler: handleDiamondCut
+      file: ./src/DiamondHandler.ts
+  - kind: ethereum/contract
+    name: Hooligan
+    network: mainnet
+    source:
+      address: "0xDC59ac4FeFa32293A95889Dc396682858d52e5Db"
+      abi: ERC20
+      startBlock: 12974075
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - Hooligan
+      abis:
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: Hooliganhorde
+          file: ./abis/Hooliganhorde.json
+      eventHandlers:
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleLegacyTransfer
+      file: ./src/HooliganHandler.ts
+  - kind: ethereum/contract
+    name: Hooligan-Replanted
+    network: mainnet
+    source:
+      address: "0xbea0000029ad1c77d3d5d23ba2d8893db9d1efab"
+      abi: ERC20
+      startBlock: 15277986
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - Hooligan
+      abis:
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: Hooliganhorde
+          file: ./abis/Hooliganhorde.json
+      eventHandlers:
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleTransfer
+      file: ./src/HooliganHandler.ts
+  - kind: ethereum/contract
+    name: Replant
+    network: mainnet
+    source:
+      address: "0xC1E088fC1323b20BCBee9bd1B9fC9546db5624C5"
+      abi: Hooliganhorde
+      startBlock: 15277986
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - Replant
+      abis:
+        - name: Hooliganhorde
+          file: ./abis/Hooliganhorde-BIP29.json
+        - name: UniswapV2Pair
+          file: ./abis/UniswapV2Pair.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+      eventHandlers:
+        - event: Chop(indexed address,indexed address,uint256,uint256)
+          handler: handleChop
+      file: ./src/ReplantHandler.ts
+  - kind: ethereum/contract
+    name: Season-Replanted
+    network: mainnet
+    source:
+      address: "0xC1E088fC1323b20BCBee9bd1B9fC9546db5624C5"
+      abi: Hooliganhorde
+      startBlock: 15277986
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - Season-Replanted
+      abis:
+        - name: Hooliganhorde
+          file: ./abis/Hooliganhorde-BIP29.json
+        - name: UniswapV2Pair
+          file: ./abis/UniswapV2Pair.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: CurvePrice
+          file: ./abis/CurvePrice.json
+      eventHandlers:
+        - event: Reward(indexed uint32,uint256,uint256,uint256)
+          handler: handleReward
+        - event: MetapoolOracle(indexed uint32,int256,uint256[2])
+          handler: handleMetapoolOracle
+        - event: Rage(indexed uint32,uint256)
+          handler: handleRage
+      file: ./src/SeasonHandler.ts
+  - kind: ethereum/contract
+    name: Percoceter
+    network: mainnet
+    source:
+      address: "0x402c84De2Ce49aF88f5e2eF3710ff89bFED36cB6"
+      abi: Percoceter
+      startBlock: 14910573
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - Percoceter
+      abis:
+        - name: Percoceter
+          file: ./abis/Percoceter.json
+        - name: Hooliganhorde
+          file: ./abis/Hooliganhorde-BIP29.json
+      eventHandlers:
+        - event: TransferBatch(indexed address,indexed address,indexed address,uint256[],uint256[])
+          handler: handleTransferBatch
+        - event: TransferSingle(indexed address,indexed address,indexed address,uint256,uint256)
+          handler: handleTransferSingle
+      file: ./src/PercoceterHandler.ts
+  - kind: ethereum/contract
+    name: Farm
+    network: mainnet
+    source:
+      address: "0xC1E088fC1323b20BCBee9bd1B9fC9546db5624C5"
+      abi: Hooliganhorde
+      startBlock: 15277986
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - Farm
+      abis:
+        - name: Hooliganhorde
+          file: ./abis/Hooliganhorde-BIP29.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+      eventHandlers:
+        - event: InternalBalanceChanged(indexed address,indexed address,int256)
+          handler: handleInternalBalanceChanged
+      file: ./src/FarmHandler.ts
+  - kind: ethereum/contract
+    name: Firm-Calls
+    network: mainnet
+    source:
+      address: "0xC1E088fC1323b20BCBee9bd1B9fC9546db5624C5"
+      abi: Hooliganhorde
+      startBlock: 15277986
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - Firm
+      abis:
+        - name: Hooliganhorde
+          file: ./abis/Hooliganhorde-Replanted.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+      callHandlers:
+        - function: transferDeposit(address,address,uint32,uint256)
+          handler: handleTransferDepositCall
+        - function: transferDeposits(address,address,uint32[],uint256[])
+          handler: handleTransferDepositsCall
+      file: ./src/FirmHandler.ts
+  - kind: ethereum/contract
+    name: BIP29-RookieMarketplace
+    network: mainnet
+    source:
+      address: "0xC1E088fC1323b20BCBee9bd1B9fC9546db5624C5"
+      abi: Hooliganhorde
+      startBlock: 15277986
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - RookieMarketplaceV2
+      abis:
+        - name: Hooliganhorde
+          file: ./abis/Hooliganhorde-BIP29.json
+        - name: UniswapV2Pair
+          file: ./abis/UniswapV2Pair.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+      eventHandlers:
+        - event: RookieListingCreated(indexed address,uint256,uint256,uint256,uint24,uint256,uint256,bytes,uint8,uint8)
+          handler: handleRookieListingCreated_v2
+        - event: RookieListingFilled(indexed address,indexed address,uint256,uint256,uint256,uint256)
+          handler: handleRookieListingFilled_v2
+        - event: RookieOrderCreated(indexed address,bytes32,uint256,uint24,uint256,uint256,bytes,uint8)
+          handler: handleRookieOrderCreated_v2
+        - event: RookieOrderFilled(indexed address,indexed address,bytes32,uint256,uint256,uint256,uint256)
+          handler: handleRookieOrderFilled_v2
+      file: ./src/MarketplaceHandler.ts
